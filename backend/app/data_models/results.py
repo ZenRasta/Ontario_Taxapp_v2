@@ -182,6 +182,9 @@ class SummaryMetrics(BaseModel):
     strategy_complexity_score: conint(ge=1, le=5) = Field(
         ..., description="Subjective score of strategy complexity (1=simple, 5=complex)."
     )
+    horizon_years: conint(ge=1) = Field(
+        ..., description="Number of years in the projection horizon."
+    )
 
     class Config:
         json_schema_extra = {
@@ -202,7 +205,8 @@ class SummaryMetrics(BaseModel):
                 "final_total_portfolio_value_pv": 150000.00,
                 "net_value_to_heirs_after_final_taxes_pv": 120000.00,
                 "sequence_risk_score": 75000.00,
-                "strategy_complexity_score": 2
+                "strategy_complexity_score": 2,
+                "horizon_years": 30
             }
         }
 
