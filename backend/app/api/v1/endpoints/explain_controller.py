@@ -22,6 +22,7 @@ async def explain(req: ExplainRequest) -> ExplainApiResponse:
             strategy_code=req.strategy_code,
             summary_metrics=req.summary,
             goal=req.goal,
+            yearly_results=req.yearly_results,
         )
     except Exception as exc:  # noqa: BLE001
         logger.exception("LLM explain error: %s", exc)

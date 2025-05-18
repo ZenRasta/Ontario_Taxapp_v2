@@ -7,7 +7,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 from app.data_models.scenario import GoalEnum, ScenarioInput, StrategyCodeEnum
-from app.data_models.results import SummaryMetrics
+from app.data_models.results import SummaryMetrics, YearlyResult
 
 
 class ExplainRequest(BaseModel):
@@ -16,6 +16,7 @@ class ExplainRequest(BaseModel):
     scenario: ScenarioInput
     strategy_code: StrategyCodeEnum
     summary: SummaryMetrics
+    yearly_results: list[YearlyResult] | None = None
     goal: GoalEnum
     request_id: UUID | None = Field(default=None)
 
