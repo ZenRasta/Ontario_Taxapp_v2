@@ -78,6 +78,9 @@ class Settings(BaseSettings):
     # LLM
     # ------------------------------------------------------------------ #
     OPENAI_API_KEY: Optional[str] = Field(default=None, env="OPENAI_API_KEY")
+    OPENAI_API_ENDPOINT_URL: Optional[str] = Field(
+        default=None, env="OPENAI_API_ENDPOINT_URL"
+    )
     OPENAI_MODEL: str = Field("gpt-4o-mini", env="OPENAI_MODEL")
     ANTHROPIC_API_KEY: Optional[str] = Field(default=None, env="ANTHROPIC_API_KEY")
     ANTHROPIC_MODEL: str = Field("claude-3-haiku-20240307", env="ANTHROPIC_MODEL")
