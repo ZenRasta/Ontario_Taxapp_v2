@@ -12,7 +12,8 @@ packages = [
 python = "^3.9" # Or your preferred Python version
 fastapi = "^0.100.0"
 uvicorn = {extras = ["standard"], version = "^0.23.2"}
-pydantic = "^1.10"
+pydantic = "^2.11"
+pydantic-settings = "^2.9"
 psycopg2-binary = "^2.9.6" # For PostgreSQL
 python-jose = {extras = ["cryptography"], version = "^3.3.0"} # For JWTs if needed
 passlib = {extras = ["bcrypt"], version = "^1.7.4"} # For password hashing if needed

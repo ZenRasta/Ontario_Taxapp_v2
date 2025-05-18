@@ -5,7 +5,11 @@ from functools import lru_cache
 from pathlib import Path
 from typing import List, Optional
 
-from pydantic import BaseSettings, Field, validator
+try:
+    from pydantic_settings import BaseSettings
+except ImportError:  # pragma: no cover - fallback for Pydantic<2.0
+    from pydantic import BaseSettings
+from pydantic import Field, validator
 
 # <repo‑root>/backend/app/core/config.py  →  repo root is three parents up
 BASE_DIR = Path(__file__).resolve().parents[2]
