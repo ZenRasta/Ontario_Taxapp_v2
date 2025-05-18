@@ -5,8 +5,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import List, Optional
 
-from pydantic import Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import BaseSettings, Field, validator
 
 # <repo‑root>/backend/app/core/config.py  →  repo root is three parents up
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -33,7 +32,7 @@ class Settings(BaseSettings):
         env="ALLOWED_CORS_ORIGINS",
     )
 
-    @field_validator("ALLOWED_CORS_ORIGINS", mode="before")
+    @validator("ALLOWED_CORS_ORIGINS", pre=True)
     @classmethod
     def _parse_origins(cls, v):
         """Parse CORS origins from environment."""
@@ -80,12 +79,10 @@ class Settings(BaseSettings):
     ANTHROPIC_MODEL: str = Field("claude-3-haiku-20240307", env="ANTHROPIC_MODEL")
 
     # ------------------------------------------------------------------ #
-    model_config = SettingsConfigDict(
-        env_file=BASE_DIR / ".env",
-        env_file_encoding="utf-8",
-        extra="ignore",
-        json_loads=lambda x: x,
-    )
+    class Config:
+        env_file = BASE_DIR / ".env"
+        env_file_encoding = "utf-8"
+        extra = "ignore"
 
 
 @lru_cache
