@@ -21,19 +21,21 @@ from abc import ABC, abstractmethod
 from decimal import Decimal
 from typing import List
 
-from app.data_models.scenario import (
-    ScenarioInput,
-    StrategyParamsInput,
-    StrategyCodeEnum,
-)
 from app.data_models.results import (
     IncomeSources,
     SummaryMetrics,
     TaxBreakdown,
     YearlyResult,
 )
+from app.data_models.scenario import (
+    ScenarioInput,
+    StrategyCodeEnum,
+    StrategyParamsInput,
+)
+from app.services.strategy_engine.state import (  # ensure this file exists
+    EngineState,
+)
 from app.services.strategy_engine.tax_rules import TaxYearData
-from app.services.strategy_engine.state import EngineState, YearScratch  # ensure this file exists
 
 # real discount rate used for PV calcs (2 % after inflation)
 REAL_DISCOUNT_RATE = Decimal("0.02")
@@ -153,4 +155,5 @@ class BaseStrategy(ABC):
             net_value_to_heirs_after_final_taxes_pv=end_bal,
             sequence_risk_score=None,
             strategy_complexity_score=self.complexity,
+            horizon_years=len(yearly),
         )
