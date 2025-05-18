@@ -1,13 +1,15 @@
 import { useState } from 'react';
 
-interface Summary {
+interface ComparisonResult {
   strategy_code: string;
   strategy_name: string;
   summary: {
     lifetime_tax_paid_nominal: number;
     average_annual_real_spending: number;
     final_total_portfolio_value_nominal: number;
-  };
+    horizon_years: number;
+  } | null;
+  error_detail?: string | null;
 }
 
 const strategyOptions = [
@@ -37,7 +39,7 @@ export default function SimulatorSection() {
     strategyOptions.map((opt) => opt.code),
   );
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<Summary[] | null>(null);
+  const [results, setResults] = useState<ComparisonResult[] | null>(null);
 
   const toggleStrategy = (code: string) => {
     setStrategies((prev) =>
@@ -72,7 +74,7 @@ export default function SimulatorSection() {
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-      setResults(data.comparisons as Summary[]);
+      setResults(data.comparisons as ComparisonResult[]);
     } catch (err) {
       console.error(err);
     } finally {
@@ -160,15 +162,23 @@ export default function SimulatorSection() {
                   <th className="p-2 text-right">Lifetime Tax</th>
                   <th className="p-2 text-right">Avg Annual Spending</th>
                   <th className="p-2 text-right">Final Portfolio</th>
+                  <th className="p-2 text-right">Horizon</th>
                 </tr>
               </thead>
               <tbody>
                 {results.map(r => (
                   <tr key={r.strategy_code} className="border-t">
                     <td className="p-2">{r.strategy_name}</td>
-                    <td className="p-2 text-right">{r.summary.lifetime_tax_paid_nominal.toLocaleString()}</td>
-                    <td className="p-2 text-right">{r.summary.average_annual_real_spending.toLocaleString()}</td>
-                    <td className="p-2 text-right">{r.summary.final_total_portfolio_value_nominal.toLocaleString()}</td>
+                    {r.summary ? (
+                      <>
+                        <td className="p-2 text-right">{r.summary.lifetime_tax_paid_nominal.toLocaleString()}</td>
+                        <td className="p-2 text-right">{r.summary.average_annual_real_spending.toLocaleString()}</td>
+                        <td className="p-2 text-right">{r.summary.final_total_portfolio_value_nominal.toLocaleString()}</td>
+                        <td className="p-2 text-right">{r.summary.horizon_years}</td>
+                      </>
+                    ) : (
+                      <td colSpan={4} className="p-2 text-red-600 text-center">{r.error_detail || 'Error running strategy'}</td>
+                    )}
                   </tr>
                 ))}
               </tbody>
