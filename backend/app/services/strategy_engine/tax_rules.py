@@ -219,14 +219,36 @@ class TaxCalculationResult(TypedDict):
 
 
 def calculate_all_taxes(
-    income: float,
-    age: int,
-    pension_inc: float,
-    td: TaxYearData,
+    income: float | None = None,
+    age: int | None = None,
+    pension_inc: float | None = None,
+    td: TaxYearData | None = None,
     province: str = "ON",
+    *,
+    total_taxable_income: float | None = None,
+    eligible_pension_income: float | None = None,
+    oas_income_included_in_taxable: float | None = None,
+    tax_year_data: TaxYearData | None = None,
 ) -> TaxCalculationResult:
+    """Calculate taxes with backward‑compatible argument names."""
+
+    # Backward compatibility for new keyword arguments
+    if income is None:
+        income = total_taxable_income
+    if pension_inc is None:
+        pension_inc = eligible_pension_income
+    if td is None:
+        td = tax_year_data
+
+    if income is None or age is None or pension_inc is None or td is None:
+        raise TypeError("calculate_all_taxes missing required arguments")
+
     if province != "ON":
         raise NotImplementedError("Only Ontario implemented.")
+
+    # `oas_income_included_in_taxable` is accepted for API compatibility but is
+    # currently not used – the clawback calculation is based on total income.
+    _ = oas_income_included_in_taxable
 
     oas_claw = calculate_oas_clawback(income, td)
     fed = calculate_federal_tax(income, age, pension_inc, td)
