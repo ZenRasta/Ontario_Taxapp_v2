@@ -33,6 +33,9 @@ class LumpSumWithdrawalStrategy(BaseStrategy):
     # alias for backward compatibility / tests
     pass
 
+    def run_year(self, idx: int, state: EngineState) -> None:
+        _run_year(self, idx, state)
+
 
 # Keep the implementation outside the class body, then mix in
 def _run_year(self: LumpSumWithdrawalStrategy, idx: int, state: EngineState) -> None:
@@ -57,7 +60,11 @@ def _run_year(self: LumpSumWithdrawalStrategy, idx: int, state: EngineState) -> 
 
     # -------------- CRA minimum withdrawal ------------------------ #
     min_rrif = Decimal(
-        str(tax_rules.get_rrif_min_withdrawal_amount(float(begin_rrif), age))
+        str(
+            tax_rules.get_rrif_min_withdrawal_amount(
+                float(begin_rrif), age, td
+            )
+        )
     )
 
     # -------------- Binary‑search withdrawal to hit spend target --- #
@@ -162,11 +169,6 @@ def _run_year(self: LumpSumWithdrawalStrategy, idx: int, state: EngineState) -> 
             end_non_reg=end_non,
         )
     )
-
-
-# bind method to class (so we didn’t indent a 300‑line class body)
-LumpSumWithdrawalStrategy.run_year = _run_year  # type: ignore[attr-defined}
-
 # backward‑compat alias
 LumpSumStrategy = LumpSumWithdrawalStrategy
 
