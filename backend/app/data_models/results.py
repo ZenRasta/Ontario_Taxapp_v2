@@ -52,8 +52,14 @@ class IncomeSources(BaseModel):
     cpp_received: confloat(ge=0) = Field(..., description="CPP benefits received (CAD).")
     oas_received_gross: confloat(ge=0) = Field(..., description="Gross OAS benefits received (before clawback) (CAD).")
     defined_benefit_pension: confloat(ge=0) = Field(..., description="Defined benefit pension income received (CAD).")
-    other_taxable_income: confloat(ge=0) = Field(
-        default=0.0, description="Other taxable income (e.g., from non-registered investments, part-time work) (CAD)."
+    # Allow negative amounts to accommodate strategies that deduct
+    # interest expenses from taxable income (e.g. Interest-Offset loans).
+    other_taxable_income: float = Field(
+        default=0.0,
+        description=(
+            "Other taxable income (e.g., from non-registered investments, part-time work) "
+            "(CAD). May be negative when interest deductions exceed income."
+        ),
     )
 
     class Config:
