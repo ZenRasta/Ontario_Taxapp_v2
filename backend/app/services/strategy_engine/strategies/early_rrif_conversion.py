@@ -28,7 +28,8 @@ from typing import Optional
 from app.data_models.scenario import StrategyCodeEnum
 from app.services.strategy_engine import tax_rules
 
-from .base_strategy import BaseStrategy, EngineState, YearScratch
+from .base_strategy import BaseStrategy
+from ..state import EngineState, YearScratch
 
 # shared constants (kept in sync with other strategies)
 ASSUMED_INFLATION = Decimal("0.02")

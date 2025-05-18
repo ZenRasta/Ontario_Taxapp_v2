@@ -30,7 +30,8 @@ from decimal import Decimal
 from typing import Optional
 
 from app.data_models.scenario import StrategyCodeEnum
-from .base_strategy import BaseStrategy, EngineState, YearScratch
+from .base_strategy import BaseStrategy
+from ..state import EngineState, YearScratch
 from app.services.strategy_engine import tax_rules
 from app.services.strategy_engine.strategies.gradual_meltdown import (
     TOL,
