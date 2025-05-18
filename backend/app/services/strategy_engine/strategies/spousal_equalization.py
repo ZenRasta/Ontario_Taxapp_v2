@@ -41,6 +41,7 @@ from app.services.strategy_engine.strategies.gradual_meltdown import (
 
 class SpousalEqualizationStrategy(BaseStrategy):
     code = StrategyCodeEnum.SEQ
+    display_name = "Spousal Equalisation"
     complexity = 3
 
     # ------------------------------------------------------------------ #

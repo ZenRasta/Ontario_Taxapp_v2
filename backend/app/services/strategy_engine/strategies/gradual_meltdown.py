@@ -37,6 +37,7 @@ TOL = Decimal("1")  # $1 tolerance for cash shortfall
 
 class GradualMeltdownStrategy(BaseStrategy):
     code = StrategyCodeEnum.GM
+    display_name = "Gradual Meltdown"
     complexity = 1
 
     # ------------------------------------------------------------------ #
