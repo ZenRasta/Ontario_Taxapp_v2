@@ -280,7 +280,13 @@ class ComparisonResponseItem(BaseModel):
     yearly_results: List[YearlyResult] = Field(
         ..., description="List of detailed results for each year of the projection."
     )
-    summary: SummaryMetrics = Field(..., description="Aggregated summary metrics for the entire strategy.")
+    summary: SummaryMetrics | None = Field(
+        default=None,
+        description="Aggregated summary metrics for the entire strategy.",
+    )
+    error_detail: str | None = Field(
+        default=None, description="Optional error message if the simulation failed."
+    )
 
     class Config:
         use_enum_values = True # Ensures enum values are used in serialization
@@ -289,7 +295,8 @@ class ComparisonResponseItem(BaseModel):
                 "strategy_code": "GM",
                 "strategy_name": "Gradual Meltdown",
                 "yearly_results": [YearlyResult.Config.json_schema_extra["example"]],
-                "summary": SummaryMetrics.Config.json_schema_extra["example"]
+                "summary": SummaryMetrics.Config.json_schema_extra["example"],
+                "error_detail": None,
             }
         }
 

@@ -20,7 +20,7 @@ const strategyOptions = [
   { code: 'LS', label: 'Lump-Sum Withdrawal' },
   { code: 'EBX', label: 'Empty-by-X' },
   { code: 'MIN', label: 'RRIF Minimums Only' },
-];
+] as const;
 
 export default function SimulatorSection() {
   const [age, setAge] = useState(65);
@@ -33,7 +33,9 @@ export default function SimulatorSection() {
   const [stddev, setStddev] = useState(8);
   const [horizon, setHorizon] = useState(25);
   const [goal, setGoal] = useState('maximize_spending');
-  const [strategies, setStrategies] = useState<string[]>(['GM']);
+  const [strategies, setStrategies] = useState<string[]>(
+    strategyOptions.map((opt) => opt.code),
+  );
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Summary[] | null>(null);
 
