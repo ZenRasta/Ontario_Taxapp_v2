@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from typing import Callable, List, Tuple
 
-import numpy as np
+try:
+    import numpy as np
+    NUMPY_AVAILABLE = True
+except Exception:  # noqa: BLE001
+    import random
+    NUMPY_AVAILABLE = False
 
 from app.data_models.results import MonteCarloPath, SummaryMetrics
 from app.data_models.scenario import (
@@ -19,7 +24,11 @@ class MonteCarloService:
     def __init__(self, engine_factory: Callable[[], StrategyEngine], n_trials: int = 1000, seed: int | None = None) -> None:
         self.engine_factory = engine_factory
         self.n_trials = n_trials
-        self.rng = np.random.default_rng(seed)
+        if NUMPY_AVAILABLE:
+            self.rng = np.random.default_rng(seed)
+        else:
+            random.seed(seed)
+            self.rng = random
 
     # --------------------------------------------------------------
     def run(
@@ -48,7 +57,10 @@ class MonteCarloService:
             withdrawals = []
             ruined = None
             for idx, yr in enumerate(yearly):
-                ret = self.rng.normal(mean, sigma)
+                if NUMPY_AVAILABLE:
+                    ret = self.rng.normal(mean, sigma)
+                else:
+                    ret = self.rng.normalvariate(mean, sigma)
                 bal *= 1 + ret
                 rrif_bal *= 1 + ret
                 w = yr.income_sources.rrif_withdrawal
@@ -75,12 +87,27 @@ class MonteCarloService:
             )
 
         ruin_probability_pct = sum(1 for r in ruin_years if r is not None) * 100 / self.n_trials
-        final_arr = np.array(final_vals)
-        median_final = float(np.median(final_arr))
-        perc10_final = float(np.percentile(final_arr, 10))
+        if NUMPY_AVAILABLE:
+            final_arr = np.array(final_vals)
+            median_final = float(np.median(final_arr))
+            perc10_final = float(np.percentile(final_arr, 10))
+        else:
+            final_arr = sorted(final_vals)
+            mid = len(final_arr) // 2
+            median_final = float(final_arr[mid]) if len(final_arr) % 2 else float((final_arr[mid - 1] + final_arr[mid]) / 2)
+            idx10 = max(0, int(len(final_arr) * 0.10) - 1)
+            perc10_final = float(final_arr[idx10])
         sequence_risk = median_final - perc10_final
         years_to_ruin = [r for r in ruin_years if r is not None]
-        years_to_ruin_pct10 = int(np.percentile(years_to_ruin, 10)) if years_to_ruin else None
+        if years_to_ruin:
+            if NUMPY_AVAILABLE:
+                years_to_ruin_pct10 = int(np.percentile(years_to_ruin, 10))
+            else:
+                years_to_ruin.sort()
+                idx = max(0, int(len(years_to_ruin) * 0.10) - 1)
+                years_to_ruin_pct10 = years_to_ruin[idx]
+        else:
+            years_to_ruin_pct10 = None
 
         mc_summary_data = summary.dict()
         mc_summary_data.update(
