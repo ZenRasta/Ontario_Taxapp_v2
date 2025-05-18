@@ -53,7 +53,7 @@ class SpousalEqualizationStrategy(BaseStrategy):
             )
 
             fallback = GradualMeltdownStrategy(
-                self.scenario, self.params, self.tax_loader
+                self.scenario, self.params, self._tax_loader
             )
             return fallback.run_year(idx, state)
 

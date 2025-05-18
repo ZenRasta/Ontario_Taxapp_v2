@@ -103,7 +103,7 @@ class BaseStrategy(ABC):
                     ),
                     total_tax_paid=float(y.total_tax),
                     after_tax_income=float(y.after_tax_income),
-                    oas_net_received=float(y.oas_net),
+                    oas_net_received=float(max(y.oas_net, 0)),
                     actual_spending=float(y.spending),
                     end_rrif_balance=float(y.end_rrif),
                     end_tfsa_balance=float(y.end_tfsa),

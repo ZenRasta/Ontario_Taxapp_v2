@@ -53,7 +53,11 @@ class InterestOffsetStrategy(BaseStrategy):
 
         # ---------- CRA minimum withdrawal ------------------------- #
         min_rrif = Decimal(
-            str(tax_rules.get_rrif_min_withdrawal_amount(float(begin_rrif), age))
+            str(
+                tax_rules.get_rrif_min_withdrawal_amount(
+                    float(begin_rrif), age, td
+                )
+            )
         )
 
         # ---------- spending target (real) ------------------------- #
