@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import SimulatorSection from './SimulatorSection';
 import {
   Bars3Icon,
   XMarkIcon,
@@ -24,7 +25,7 @@ function NavBar() {
           <a href="#why-us" className="text-gray-700 hover:text-blue-600">Why Choose Us</a>
           <a href="#testimonials" className="text-gray-700 hover:text-blue-600">Testimonials</a>
           <a href="#faq" className="text-gray-700 hover:text-blue-600">FAQ</a>
-          <a href="#cta" className="ml-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Try It Now</a>
+          <a href="#simulator" className="ml-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Try It Now</a>
         </div>
         <button className="md:hidden p-2 text-gray-700" onClick={() => setOpen(!open)} aria-label="Toggle menu">
           {open ? <XMarkIcon className="h-6 w-6" aria-hidden="true" /> : <Bars3Icon className="h-6 w-6" aria-hidden="true" />}
@@ -38,7 +39,7 @@ function NavBar() {
             <a href="#why-us" className="text-gray-700 hover:text-blue-600">Why Choose Us</a>
             <a href="#testimonials" className="text-gray-700 hover:text-blue-600">Testimonials</a>
             <a href="#faq" className="text-gray-700 hover:text-blue-600">FAQ</a>
-            <a href="#cta" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-center">Try It Now</a>
+            <a href="#simulator" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-center">Try It Now</a>
           </div>
         </div>
       )}
@@ -54,7 +55,7 @@ function HeroSection() {
           <h1 className="text-4xl lg:text-5xl font-bold text-gray-800">Plan Your Retirement Withdrawals with Confidence</h1>
           <p className="mt-4 text-xl text-gray-700">Designed for Ontarians 55+, our free simulator uses official CRA rules to help you maximize your retirement income and minimize taxes on your RRSP/RRIF withdrawals.</p>
           <div className="mt-8 flex space-x-4">
-            <a href="#cta" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded">Run a Free Simulation</a>
+            <a href="#simulator" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded">Run a Free Simulation</a>
             <a href="#process" className="border border-blue-600 text-blue-600 bg-white hover:bg-blue-50 py-3 px-6 rounded">Learn How It Works</a>
           </div>
         </div>
@@ -265,7 +266,7 @@ function FinalCTASection() {
     <section id="cta" className="py-16 bg-blue-600 text-white text-center">
       <h2 className="text-3xl font-bold">Ready to secure your retirement?</h2>
       <p className="mt-4 text-lg">Get personalized retirement withdrawal strategies in seconds. It\u2019s free and no signup is needed.</p>
-      <a href="#hero" className="mt-6 inline-block bg-white text-blue-600 font-semibold py-3 px-6 rounded hover:bg-blue-50">Run Your Free Simulation</a>
+      <a href="#simulator" className="mt-6 inline-block bg-white text-blue-600 font-semibold py-3 px-6 rounded hover:bg-blue-50">Run Your Free Simulation</a>
     </section>
   );
 }
@@ -291,6 +292,7 @@ export default function App() {
       <NavBar />
       <main className="pt-20">
         <HeroSection />
+        <SimulatorSection />
         <SocialProofBar />
         <StrategiesSection />
         <ProcessSection />
