@@ -29,7 +29,8 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------------ #
     API_PREFIX: str = Field(default="/api/v1", env="API_PREFIX")
     ALLOWED_CORS_ORIGINS: List[str] = Field(
-        default=["http://localhost:5173"], env="ALLOWED_CORS_ORIGINS"
+        default_factory=lambda: ["http://localhost:5173"],
+        env="ALLOWED_CORS_ORIGINS",
     )
 
     @field_validator("ALLOWED_CORS_ORIGINS", mode="before")
@@ -83,6 +84,7 @@ class Settings(BaseSettings):
         env_file=BASE_DIR / ".env",
         env_file_encoding="utf-8",
         extra="ignore",
+        json_loads=lambda x: x,
     )
 
 
