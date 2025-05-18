@@ -1,5 +1,20 @@
 import { useState } from 'react';
 
+interface YearlyResult {
+  year: number;
+  age: number;
+  income_sources: {
+    defined_benefit_pension: number;
+    cpp_received: number;
+    rrif_withdrawal: number;
+  };
+  oas_net_received: number;
+  total_taxable_income: number;
+  total_tax_paid: number;
+  after_tax_income: number;
+  end_rrif_balance: number;
+}
+
 interface ComparisonResult {
   strategy_code: string;
   strategy_name: string;
@@ -9,6 +24,7 @@ interface ComparisonResult {
     final_total_portfolio_value_nominal: number;
     horizon_years: number;
   } | null;
+  yearly_results?: YearlyResult[];
   error_detail?: string | null;
 }
 
@@ -154,7 +170,7 @@ export default function SimulatorSection() {
           </button>
         </form>
         {results && (
-          <div className="mt-8 overflow-x-auto">
+          <div className="mt-8 overflow-x-auto space-y-8">
             <table className="min-w-full text-sm border">
               <thead>
                 <tr className="bg-gray-200">
@@ -183,6 +199,50 @@ export default function SimulatorSection() {
                 ))}
               </tbody>
             </table>
+
+            {results.map(r => (
+              <div key={r.strategy_code} className="mt-8">
+                {r.yearly_results && r.yearly_results.length > 0 && (
+                  <>
+                    <h3 className="font-semibold mb-2">
+                      {r.strategy_name} Projection
+                    </h3>
+                    <table className="min-w-full text-xs border">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          <th className="p-1">Year</th>
+                          <th className="p-1">Age</th>
+                          <th className="p-1">Pension ($)</th>
+                          <th className="p-1">CPP ($)</th>
+                          <th className="p-1">OAS (Net) ($)</th>
+                          <th className="p-1">RRIF WD ($)</th>
+                          <th className="p-1">Total Inc ($)</th>
+                          <th className="p-1">Tax Payable ($)</th>
+                          <th className="p-1">Net Cash ($)</th>
+                          <th className="p-1">End RRIF ($)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {r.yearly_results.map(y => (
+                          <tr key={y.year} className="border-t">
+                            <td className="p-1 text-right">{y.year}</td>
+                            <td className="p-1 text-right">{y.age}</td>
+                            <td className="p-1 text-right">{Math.round(y.income_sources.defined_benefit_pension).toLocaleString()}</td>
+                            <td className="p-1 text-right">{Math.round(y.income_sources.cpp_received).toLocaleString()}</td>
+                            <td className="p-1 text-right">{Math.round(y.oas_net_received).toLocaleString()}</td>
+                            <td className="p-1 text-right">{Math.round(y.income_sources.rrif_withdrawal).toLocaleString()}</td>
+                            <td className="p-1 text-right">{Math.round(y.total_taxable_income).toLocaleString()}</td>
+                            <td className="p-1 text-right">{Math.round(y.total_tax_paid).toLocaleString()}</td>
+                            <td className="p-1 text-right">{Math.round(y.after_tax_income).toLocaleString()}</td>
+                            <td className="p-1 text-right">{Math.round(y.end_rrif_balance).toLocaleString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>
