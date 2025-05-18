@@ -6,7 +6,7 @@ import logging
 import httpx
 
 from app.core.config import settings  # Use the singleton settings
-from app.data_models.results import SummaryMetrics
+from app.data_models.results import SummaryMetrics, YearlyResult
 from app.data_models.scenario import GoalEnum, ScenarioInput, StrategyCodeEnum
 
 # from app.data_models.strategy import get_strategy_meta # If you have strategy descriptions there
@@ -35,13 +35,49 @@ STRATEGY_TRADEOFFS = {
 }
 
 
+def _format_projection_table(yearly: list[YearlyResult]) -> str:
+    """Return a tab-separated table of yearly projection values."""
+    headers = [
+        "Year",
+        "Age",
+        "Pension ($)",
+        "CPP ($)",
+        "OAS (Net) ($)",
+        "RRIF WD ($)",
+        "Total Inc ($)",
+        "Tax Payable ($)",
+        "Net Cash ($)",
+        "End RRIF ($)",
+    ]
+    lines = ["\t".join(headers)]
+    for yr in yearly:
+        lines.append(
+            "\t".join(
+                [
+                    str(yr.year),
+                    str(yr.age),
+                    f"{yr.income_sources.defined_benefit_pension:,.0f}",
+                    f"{yr.income_sources.cpp_received:,.0f}",
+                    f"{yr.oas_net_received:,.0f}",
+                    f"{yr.income_sources.rrif_withdrawal:,.0f}",
+                    f"{yr.total_taxable_income:,.0f}",
+                    f"{yr.total_tax_paid:,.0f}",
+                    f"{yr.after_tax_income:,.0f}",
+                    f"{yr.end_rrif_balance:,.0f}",
+                ]
+            )
+        )
+    return "\n".join(lines)
+
+
 async def explain_strategy_with_context(  # noqa: C901
 
     scenario: ScenarioInput,
     strategy_code: StrategyCodeEnum,
     # strategy_name: str, # Can get from StrategyMeta or build from code
     summary_metrics: SummaryMetrics,
-    goal: GoalEnum
+    goal: GoalEnum,
+    yearly_results: list[YearlyResult] | None = None,
 ) -> str:
     """
     Calls an LLM to produce a plain-English explanation of a strategy's
@@ -124,6 +160,10 @@ async def explain_strategy_with_context(  # noqa: C901
         key_outcomes_for_goal.append(f"With this '{strategy_label}' approach, your projected lifetime tax (in today's dollars) is about ${summary_metrics.lifetime_tax_paid_pv:,.0f}, and you could expect to spend around ${summary_metrics.average_annual_real_spending:,.0f} per year on average.")
 
     prompt_parts.extend([f"- {outcome}" for outcome in key_outcomes_for_goal])
+
+    if yearly_results:
+        prompt_parts.append("\n--- Detailed Projection ---")
+        prompt_parts.append(_format_projection_table(yearly_results))
 
 
     prompt_parts.append("\n--- Important Considerations & Trade-offs ---")
