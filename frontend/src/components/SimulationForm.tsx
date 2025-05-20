@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import type { GridColDef } from '@mui/x-data-grid';
-import type { StrategyParamsInput } from '../types/api';
+import type { StrategyParamsInput } from '../types';
 
 interface FormValues {
   strategy_params: StrategyParamsInput;
@@ -50,11 +50,11 @@ const schema = yup.object({
       .min(60)
       .max(70)
       .when('$delay', (delay: boolean, s: any) => (delay ? s.required() : s)),
-    interest_rate: yup
+    loan_interest_rate_pct: yup
       .number()
       .typeError('Required')
       .when('$interest', (interest: boolean, s: any) => (interest ? s.required() : s)),
-    loan_pct_rrif: yup
+    loan_amount_as_pct_of_rrif: yup
       .number()
       .typeError('Required')
       .when('$interest', (interest: boolean, s: any) => (interest ? s.required() : s)),
@@ -246,14 +246,14 @@ export default function SimulationForm() {
       {interest && (
         <Box>
           <Controller
-            name="strategy_params.interest_rate"
+            name="strategy_params.loan_interest_rate_pct"
             control={control}
             render={({ field }) => (
               <TextField
                 {...field}
                 label="Loan interest rate %"
-                error={!!errors.strategy_params?.interest_rate}
-                helperText={errors.strategy_params?.interest_rate?.message}
+                  error={!!errors.strategy_params?.loan_interest_rate_pct}
+                  helperText={errors.strategy_params?.loan_interest_rate_pct?.message}
                 type="number"
                 fullWidth
                 margin="normal"
@@ -261,14 +261,14 @@ export default function SimulationForm() {
             )}
           />
           <Controller
-            name="strategy_params.loan_pct_rrif"
+            name="strategy_params.loan_amount_as_pct_of_rrif"
             control={control}
             render={({ field }) => (
               <TextField
                 {...field}
                 label="Loan % of RRIF (0-100)"
-                error={!!errors.strategy_params?.loan_pct_rrif}
-                helperText={errors.strategy_params?.loan_pct_rrif?.message}
+                  error={!!errors.strategy_params?.loan_amount_as_pct_of_rrif}
+                  helperText={errors.strategy_params?.loan_amount_as_pct_of_rrif?.message}
                 type="number"
                 fullWidth
                 margin="normal"

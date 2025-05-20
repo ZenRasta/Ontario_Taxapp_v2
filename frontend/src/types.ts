@@ -1,3 +1,13 @@
+export interface SpouseInput {
+  age: number;
+  rrsp_balance: number;
+  other_income?: number;
+  cpp_at_65?: number;
+  oas_at_65?: number;
+  tfsa_balance?: number;
+  defined_benefit_pension?: number;
+}
+
 export interface StrategyParamsInput {
   bracket_fill_ceiling?: number;
   rrif_conversion_age?: number;
@@ -8,6 +18,7 @@ export interface StrategyParamsInput {
   lump_sum_amount?: number;
   loan_interest_rate_pct?: number;
   loan_amount_as_pct_of_rrif?: number;
+  spouse?: SpouseInput;
 }
 
 export interface ScenarioInput {
@@ -23,15 +34,7 @@ export interface ScenarioInput {
   life_expectancy_years: number;
   province: string;
   goal: string;
-  spouse?: {
-    age: number;
-    rrsp_balance: number;
-    other_income: number;
-    cpp_at_65: number;
-    oas_at_65: number;
-    tfsa_balance: number;
-    defined_benefit_pension: number;
-  };
+  spouse?: SpouseInput;
   params?: StrategyParamsInput;
 }
 
