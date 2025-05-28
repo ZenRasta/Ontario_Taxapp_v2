@@ -16,6 +16,7 @@ from decimal import Decimal
 from typing import Optional
 
 from app.data_models.scenario import StrategyCodeEnum
+from ..engine import register
 from .base_strategy import BaseStrategy, EngineState, YearScratch
 from app.services.strategy_engine import tax_rules
 
@@ -25,6 +26,7 @@ MAX_ITER = 20
 TOL = Decimal("1")  # $1 tolerance on cash shortfall
 
 
+@register(StrategyCodeEnum.LS)
 class LumpSumWithdrawalStrategy(BaseStrategy):
     code = StrategyCodeEnum.LS
     display_name = "Lump‑Sum Withdrawal"

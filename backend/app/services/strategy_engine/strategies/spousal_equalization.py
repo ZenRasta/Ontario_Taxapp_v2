@@ -30,6 +30,7 @@ from decimal import Decimal
 from typing import Optional
 
 from app.data_models.scenario import StrategyCodeEnum
+from ..engine import register
 from .base_strategy import BaseStrategy, EngineState, YearScratch
 from app.services.strategy_engine import tax_rules
 from app.services.strategy_engine.strategies.gradual_meltdown import (
@@ -37,8 +38,9 @@ from app.services.strategy_engine.strategies.gradual_meltdown import (
     MAX_ITER,
     ASSUMED_INFLATION,
     TAXABLE_PORTION_NONREG_GROWTH,
-)
+) 
 
+@register(StrategyCodeEnum.SEQ)
 class SpousalEqualizationStrategy(BaseStrategy):
     code = StrategyCodeEnum.SEQ
     complexity = 3
