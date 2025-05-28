@@ -67,9 +67,12 @@ app.add_middleware(
 # ------------------------------------------------------------------ #
 # include v1 simulation router (defined in app/api/v1/simulate.py)
 # ------------------------------------------------------------------ #
-from app.api.v1.simulate import router as simulate_router  # noqa: E402  (import after FastAPI instantiated)
+from app.api.v1.simulate import (
+    router as simulate_router,
+)  # noqa: E402  (import after FastAPI instantiated)
 
 app.include_router(simulate_router)
+
 
 # ------------------------------------------------------------------ #
 # database init (runs once at start-up)
@@ -80,6 +83,7 @@ async def _init_db() -> None:
     await create_db_and_tables()
     logger.info("DB ready.")
 
+
 # ------------------------------------------------------------------ #
 # singletons
 # ------------------------------------------------------------------ #
@@ -89,6 +93,7 @@ mc_service = MonteCarloService(
     engine_factory=lambda: StrategyEngine(tax_year_data_loader=load_tax_year_data),
     n_trials=1_000,
 )
+
 
 # ------------------------------------------------------------------ #
 # helpers
@@ -109,6 +114,30 @@ def _auto_strategies(goal: GoalEnum) -> List[StrategyCodeEnum]:
         return [StrategyCodeEnum.MIN, StrategyCodeEnum.GM]
     return [StrategyCodeEnum.GM]
 
+
+def _create_default_summary_metrics() -> SummaryMetrics:
+    """Return a SummaryMetrics object with zero/None defaults."""
+    return SummaryMetrics(
+        lifetime_tax_paid_nominal=0.0,
+        lifetime_tax_paid_pv=0.0,
+        average_effective_tax_rate=0.0,
+        average_marginal_tax_rate_on_rrif=None,
+        years_in_oas_clawback=0,
+        total_oas_clawback_paid_nominal=0.0,
+        tax_volatility_score=None,
+        max_sustainable_spending_pv=None,
+        average_annual_real_spending=0.0,
+        cashflow_coverage_ratio=None,
+        ruin_probability_pct=None,
+        years_to_ruin_percentile_10=None,
+        final_total_portfolio_value_nominal=0.0,
+        final_total_portfolio_value_pv=0.0,
+        net_value_to_heirs_after_final_taxes_pv=0.0,
+        sequence_risk_score=None,
+        strategy_complexity_score=1,
+    )
+
+
 # ------------------------------------------------------------------ #
 # legacy router (deterministic + MC endpoints) – mounted at /api
 # ------------------------------------------------------------------ #
@@ -120,23 +149,33 @@ class StrategiesResponse(BaseModel):
     recommended: List[StrategyCodeEnum] = []
 
 
-def _require_params(code: StrategyCodeEnum, params: StrategyParamsInput, scenario: ScenarioInput) -> None:
+def _require_params(
+    code: StrategyCodeEnum, params: StrategyParamsInput, scenario: ScenarioInput
+) -> None:
     if code == StrategyCodeEnum.BF and params.bracket_fill_ceiling is None:
         raise HTTPException(422, "bracket_fill_ceiling required for BF strategy")
     if code == StrategyCodeEnum.LS and (
         params.lump_sum_amount is None or params.lump_sum_year_offset is None
     ):
-        raise HTTPException(422, "lump_sum_amount and lump_sum_year_offset required for LS strategy")
+        raise HTTPException(
+            422, "lump_sum_amount and lump_sum_year_offset required for LS strategy"
+        )
     if code == StrategyCodeEnum.EBX and params.target_depletion_age is None:
         raise HTTPException(422, "target_depletion_age required for EBX strategy")
     if code == StrategyCodeEnum.CD and (
         params.cpp_start_age is None or params.oas_start_age is None
     ):
-        raise HTTPException(422, "cpp_start_age and oas_start_age required for CD strategy")
+        raise HTTPException(
+            422, "cpp_start_age and oas_start_age required for CD strategy"
+        )
     if code == StrategyCodeEnum.IO and (
-        params.loan_interest_rate_pct is None or params.loan_amount_as_pct_of_rrif is None
+        params.loan_interest_rate_pct is None
+        or params.loan_amount_as_pct_of_rrif is None
     ):
-        raise HTTPException(422, "loan_interest_rate_pct and loan_amount_as_pct_of_rrif required for IO strategy")
+        raise HTTPException(
+            422,
+            "loan_interest_rate_pct and loan_amount_as_pct_of_rrif required for IO strategy",
+        )
     if code == StrategyCodeEnum.SEQ and not (scenario.spouse or params.spouse):
         raise HTTPException(422, "spouse info required for SEQ strategy")
 
@@ -167,6 +206,7 @@ async def simulate(req: SimulateRequest):
         yearly_results=yearly,
         summary=summary,
     )
+
 
 # ---------- deterministic compare -----------------------------------
 @router.post("/compare", response_model=CompareApiResponse, tags=["Simulation"])
@@ -208,17 +248,20 @@ async def compare(req: CompareRequest):
                     strategy_code=code,
                     strategy_name=_strategy_display(code),
                     yearly_results=[],
-                    summary=None,
+                    summary=_create_default_summary_metrics(),
                     error_detail=str(exc),
                 )
             )
 
     return CompareApiResponse(request_id=req.request_id, comparisons=items)
 
+
 # ---------- Monte-Carlo simulation  ----------------------------------
 @router.post("/simulate_mc", tags=["Monte-Carlo"], response_model=dict)
 async def simulate_mc(req: SimulateRequest):
-    logger.info("simulate_mc request_id=%s strategy=%s", req.request_id, req.strategy_code)
+    logger.info(
+        "simulate_mc request_id=%s strategy=%s", req.request_id, req.strategy_code
+    )
     if req.scenario is None:
         raise HTTPException(422, "scenario is required")
     if req.strategy_code is None:
@@ -235,13 +278,14 @@ async def simulate_mc(req: SimulateRequest):
 
     return {"request_id": req.request_id, "paths": paths, "mc_summary": mc_summary}
 
+
 # ---------- health ---------------------------------------------------
 @router.get("/health", tags=["Health"])
 async def health():
     return {"status": "healthy"}
 
+
 # ------------------------------------------------------------------ #
 # mount legacy router under configurable prefix (default: /api)
 # ------------------------------------------------------------------ #
 app.include_router(router, prefix=settings.API_PREFIX)
-
