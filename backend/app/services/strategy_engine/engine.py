@@ -12,11 +12,16 @@ backend/app/services/strategy_engine/strategies/*.py
 
 from __future__ import annotations
 
-from typing import List, Dict, Type
+from typing import List, Dict, Type, Tuple
 
-from app.data_models.scenario import ScenarioInput
+from app.data_models.scenario import (
+    ScenarioInput,
+    StrategyParamsInput,
+    StrategyCodeEnum,
+)
 from app.data_models.results import ResultSummary, SummaryMetrics, YearlyResult
 from app.services.strategy_engine.strategies.base_strategy import BaseStrategy
+from app.utils.year_data_loader import load_tax_year_data
 
 
 # ------------------------------------------------------------------
@@ -46,41 +51,57 @@ from . import strategies as _loaded_strategies  # noqa: F401
 # Existing helper for single-strategy execution (unchanged)
 # ------------------------------------------------------------------
 
-def run_single_strategy(code: str, scenario: ScenarioInput) -> SummaryMetrics:
+def run_single_strategy(
+    code: StrategyCodeEnum,
+    scenario: ScenarioInput,
+    params: StrategyParamsInput,
+    tax_loader=load_tax_year_data,
+) -> Tuple[List[YearlyResult], SummaryMetrics]:
+    """Instantiate and execute a single strategy."""
     try:
         strategy_cls = _STRATEGY_REGISTRY[code]
     except KeyError:
         raise ValueError(f"Unknown strategy code '{code}'")
-    engine = strategy_cls(scenario)
-    return engine.run()                 # returns SummaryMetrics
+
+    engine = strategy_cls(scenario, params, tax_loader)
+    return engine.run()
 
 
 # ────────────────────────────────────────────────────────────────────────────
 # ★ NEW batch helper – returns List[ResultSummary] for wizard UI
 # ────────────────────────────────────────────────────────────────────────────
-def run_strategy_batch(scenario: ScenarioInput) -> List[ResultSummary]:
+def run_strategy_batch(
+    scenario: ScenarioInput,
+    params: StrategyParamsInput,
+    tax_loader=load_tax_year_data,
+) -> List[ResultSummary]:
     """
     Loop over the user-selected strategy codes and build a
     ResultSummary for each (thin wrapper around existing logic).
     """
     summaries: List[ResultSummary] = []
     for code in scenario.strategies:
-        metrics: SummaryMetrics = run_single_strategy(code, scenario)
+        yearly, metrics = run_single_strategy(code, scenario, params, tax_loader)
+        name = (
+            code.value if isinstance(code, StrategyCodeEnum) else str(code)
+        ).replace("_", " ").title()
 
-        # convert SummaryMetrics into the lightweight ResultSummary
         summaries.append(
             ResultSummary(
                 strategy_code=code,
-                strategy_name=metrics.strategy_code.replace('_', ' ').title(),
-                total_taxes=metrics.lifetime_tax_paid,
-                total_spending=metrics.max_sustainable_spending,
-                final_estate=metrics.estate_value,
+                strategy_name=name,
+                total_taxes=metrics.lifetime_tax_paid_nominal,
+                total_spending=metrics.average_annual_real_spending,
+                final_estate=metrics.final_total_portfolio_value_nominal,
                 yearly_balances=[
-                    # Only send (year, portfolio_end) – small & chart-friendly
-                    YearlyResult(year=r.year, portfolio_end=r.end_rrif_balance
-                                 + r.end_tfsa_balance + r.end_non_reg_balance)
-                    for r in metrics.yearly_results  # if you store them
-                ] if hasattr(metrics, "yearly_results") else []
+                    YearlyResult(
+                        year=r.year,
+                        portfolio_end=r.end_rrif_balance
+                        + r.end_tfsa_balance
+                        + r.end_non_reg_balance,
+                    )
+                    for r in yearly
+                ],
             )
         )
     return summaries
@@ -100,23 +121,33 @@ class StrategyEngine:
     def __init__(
         self,
         scenario: ScenarioInput | None = None,
-        tax_year_data_loader=None,   # legacy kwarg – ignored here
-        **_ignored,                  # swallow any other old kwargs
+        tax_year_data_loader=load_tax_year_data,
+        **_ignored,
     ):
         self.scenario = scenario
+        self.tax_year_data_loader = tax_year_data_loader
 
     # ---------- legacy instance methods ---------------------------
-    def run(self, code: str, scenario: ScenarioInput | None = None) -> SummaryMetrics:
-        """Run a single strategy."""
+    def run(
+        self,
+        scenario: ScenarioInput,
+        code: StrategyCodeEnum,
+        params: StrategyParamsInput,
+    ) -> Tuple[List[YearlyResult], SummaryMetrics]:
+        """Run a single strategy and return yearly + summary results."""
         sc = scenario or self.scenario
         if sc is None:
             raise ValueError("Scenario must be supplied.")
-        return run_single_strategy(code, sc)
+        return run_single_strategy(code, sc, params, self.tax_year_data_loader)
 
-    def run_batch(self, scenario: ScenarioInput | None = None) -> List[ResultSummary]:
+    def run_batch(
+        self,
+        scenario: ScenarioInput,
+        params: StrategyParamsInput,
+    ) -> List[ResultSummary]:
         """Run all codes in the scenario for the wizard UI."""
         sc = scenario or self.scenario
         if sc is None:
             raise ValueError("Scenario must be supplied.")
-        return run_strategy_batch(sc)
+        return run_strategy_batch(sc, params, self.tax_year_data_loader)
 
