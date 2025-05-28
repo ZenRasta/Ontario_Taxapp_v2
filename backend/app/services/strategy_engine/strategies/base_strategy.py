@@ -160,3 +160,20 @@ class BaseStrategy(ABC):
             sequence_risk_score=None,
             strategy_complexity_score=self.complexity,
         )
+
+    # ------------------------------------------------------------------ #
+    def run(self):
+        """Execute the full deterministic projection for this strategy."""
+        # 1. initial engine state (balances at start of projection)
+        state = EngineState.initial(self.scenario, self.start_year)
+
+        # 2. loop over each projection year
+        for idx in range(self.scenario.life_expectancy_years):
+            self.run_year(idx, state)
+
+        # 3. convert scratch rows -> API models
+        yearly_results = self.build_yearly_results(state)
+        summary = self.build_summary(yearly_results)
+
+        # 4. return both detailed yearly results and summary metrics
+        return yearly_results, summary
