@@ -12,6 +12,7 @@ from decimal import Decimal
 from typing import Optional
 
 from app.data_models.scenario import StrategyCodeEnum
+from ..engine import register
 from .base_strategy import BaseStrategy, EngineState, YearScratch
 from app.services.strategy_engine import tax_rules
 
@@ -21,6 +22,7 @@ MAX_ITER = 20
 TOL = Decimal("1")            # $1 cash‑flow tolerance
 
 
+@register(StrategyCodeEnum.IO)
 class InterestOffsetStrategy(BaseStrategy):
     """Alias kept for backward compatibility."""
     code = StrategyCodeEnum.IO

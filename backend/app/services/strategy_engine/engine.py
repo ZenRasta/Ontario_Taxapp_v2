@@ -37,6 +37,12 @@ def register(code: str):
 
 
 # ------------------------------------------------------------------
+# Load all strategy modules so decorators run on import
+# ------------------------------------------------------------------
+from . import strategies as _loaded_strategies  # noqa: F401
+
+
+# ------------------------------------------------------------------
 # Existing helper for single-strategy execution (unchanged)
 # ------------------------------------------------------------------
 
