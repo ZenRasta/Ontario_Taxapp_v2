@@ -31,5 +31,5 @@ COPY ./data /app/data
 EXPOSE 8000
 
 # Command to run the application
-# Adjust if your main.py is elsewhere or app instance is named differently
+# The FastAPI app is defined in ``app/main.py`` as ``app``
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

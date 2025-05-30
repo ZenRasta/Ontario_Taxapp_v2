@@ -25,6 +25,16 @@ cd frontend
 npm ci
 ```
 
+### Running the backend
+
+Launch the development server with Uvicorn. The FastAPI application is
+defined in `backend/app/main.py`:
+
+```bash
+cd backend
+poetry run uvicorn app.main:app --reload
+```
+
 ## Tax data
 
 The consolidated tax tables live in `backend/data/tax_years.yml`.  Additional

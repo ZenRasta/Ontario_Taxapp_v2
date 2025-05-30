@@ -2,6 +2,9 @@
 
 Project description here.
 
+The FastAPI application entrypoint lives in `app/main.py`. Deployment
+files reference this module as `app.main:app`.
+
 ## Dependencies
 
 The backend reads tax tables from YAML files. A real installation of
